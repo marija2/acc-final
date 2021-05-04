@@ -1,0 +1,24 @@
+{
+  "name": "acc-final",
+  "version": "1.0.0",
+  "description": "Final project for acc",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marija2/acc-final.git"
+  },
+  "author": "Marija Trifkovic",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/marija2/acc-final/issues"
+  },
+  "homepage": "https://github.com/marija2/acc-final#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "nedb": "^1.8.0",
+    "socket.io": "^4.0.1"
+  }
+}
