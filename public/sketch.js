@@ -142,7 +142,7 @@ function setup() {
 
   newPinBubble = new NewPinBubble();
 
-  socket = io.connect ( 'http://localhost:3000' );
+  socket = io.connect ( 'https://acc-final.herokuapp.com' );
 
   socket.on ( 'heresData', function ( data ) {
     
