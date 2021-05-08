@@ -11,17 +11,27 @@ There are three main functionalities that this application supports:
 
 ###### 1. Viewing the text attached to each pin
 
-    In order to see the text for each pin, simply click on a pin for which you\\
-    want to get more information. The pin will get larger and you will be able to see the text associated to that pin.
+    In order to see the text for each pin, simply click on a pin for which you 
+    want to get more information. The pin will get larger and you will be able 
+    to see the text associated to that pin.
 
 ###### 2. Adding a new pin
 
-    In order to add a pin of you own, double click on the spot on the map where you would like to place your pin. You will see a new bubble pop up. Choose the color of your pin and tell us why you are pinning that place. Now click the "Pin" button. You will see your new pin on the map. If at any point you decide you do not what to proceed with pinning the place, click the "close" button.
+    In order to add a pin of you own, double click on the spot on the map where 
+    you would like to place your pin. You will see a new bubble pop up. Choose 
+    the color of your pin and tell us why you are pinning that place. Now click 
+    the "Pin" button. You will see your new pin on the map. If at any point you 
+    decide you do not what to proceed with pinning the place, click the "close"
+    button.
 
 ###### 3. Deleting a pin
 
-    In order to delete a pin, place your mouse over the pin you want to delete and press the backspace button. The pin will be deleted and will disappear from the map.
+    In order to delete a pin, place your mouse over the pin you want to delete 
+    and press the backspace button. The pin will be deleted and will disappear 
+    from the map.
 
 ## Keep in mind:
 
-    Everyone can see the pins that you add. If you delete a pin, it will be deleted from the database, therefore, nobody else will be able to see it any more.
+    Everyone can see the pins that you add. If you delete a pin, it will be 
+    deleted from the database, therefore, nobody else will be able to see it 
+    any more.
