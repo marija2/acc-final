@@ -19,11 +19,11 @@ There are three main functionalities that this application supports:
 
 ###### 2. Adding a new pin
 
-    In order to add a pin of you own, double click on the spot on the map where 
+    In order to add a pin of your own, double click on the spot on the map where 
     you would like to place your pin. You will see a new bubble pop up. Choose 
     the color of your pin and tell us why you are pinning that place. Now click 
     the "Pin" button. You will see your new pin on the map. If at any point you 
-    decide you do not what to proceed with pinning the place, click the "close"
+    decide you do not what to proceed with pinning the place, click the "Close"
     button.
 
 ###### 3. Deleting a pin
