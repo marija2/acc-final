@@ -21,6 +21,7 @@ var newPinBubble;
 
 var clickLabel;
 var addPinLabel;
+var deleteLabel;
 var colorLabel;
 var textLabel;
 var textInput;
@@ -28,6 +29,41 @@ var pinBtn;
 var closeBtn;
 
 var socket;
+var notificationBubble;
+
+class NotificationBubble {
+
+  constructor() {
+    this.text = "";
+    this.color = color ( 0, 0, 0 );
+    this.timer = 0;
+  }
+
+  setFields ( text, color ) {
+    this.text = text;
+    this.color = color;
+    this.timer = 5;
+  }
+
+  getTimer() { return this.timer; }
+
+  decrementTimer() { this.timer--; }
+
+  putOnMap () {
+
+    if ( this.timer == 0 ) return;
+
+    noStroke ();
+    var bubbleColor = color ( this.color );
+    bubbleColor.setAlpha ( 200 );
+    fill ( bubbleColor );
+    rect ( windowWidth - 310, windowHeight - 100, 290, 70, 20 );
+    if ( bubbleColor.levels[0] + bubbleColor.levels[1] + bubbleColor.levels[2] >= 381 ) fill ( 0 );
+    else fill ( 255 );
+    textAlign ( CENTER, CENTER );
+    text ( this.text, windowWidth - 300, windowHeight - 90, 270, 50 );
+  }
+};
 
 class NewPinBubble {
 
@@ -48,8 +84,10 @@ class NewPinBubble {
     if ( !this.opened ) return;
 
     pos = map.latLngToPixel ( this.x, this.y );
-    noStroke ( );
-    fill ( 110, 110, 110 );
+    noStroke();
+    var bubbleColor = color ( 80, 80, 80 );
+    bubbleColor.setAlpha ( 255 );
+    fill ( bubbleColor );
     triangle ( pos.x, pos.y, pos.x - 10, pos.y - 20, pos.x + 10, pos.y - 20 );
     rect ( pos.x - 140, pos.y - 160, 280, 140, 20 );
 
@@ -113,14 +151,17 @@ class Pin {
 
   putInfoOnMap() {
 
+    var zoom = map.zoom();
+    if ( map.zoom() > 7 ) zoom = 7;
+
     stroke ( 255 );
-    line ( pos.x, pos.y, pos.x, pos.y - map.zoom() * 5 );
+    line ( pos.x, pos.y, pos.x, pos.y - zoom * 5 );
     fill ( this.color );
-    circle( pos.x, pos.y - map.zoom() * 20, map.zoom() * 30 );
+    circle( pos.x, pos.y - zoom * 20, zoom * 30 );
     fill ( 0 );
     strokeWeight ( 2 );
     textAlign ( CENTER, CENTER );
-    text ( this.text, pos.x - map.zoom() * 10, pos.y - map.zoom() * 30, map.zoom() * 20, map.zoom() * 20 );
+    text ( this.text, pos.x - zoom * 10, pos.y - zoom * 30, zoom * 20, zoom * 20 );
     strokeWeight ( 1 );
   }
 
@@ -132,7 +173,7 @@ class Pin {
       this.putInfoOnMap();
       return;
     }
-
+    
     strokeWeight ( 1 );
     stroke ( 255 );
     line ( pos.x, pos.y, pos.x, pos.y - map.zoom() * 5 );
@@ -150,9 +191,18 @@ class Pin {
 
 };
 
+function  timeIt() {
+  
+  if ( notificationBubble.getTimer() > 0 ) notificationBubble.decrementTimer();
+  else mapMoved();
+}
+
 function setup() {
 
+  setInterval ( timeIt, 1000 );
+
   newPinBubble = new NewPinBubble();
+  notificationBubble = new NotificationBubble();
 
   socket = io.connect ( 'https://acc-final.herokuapp.com' );
   //socket = io.connect ( 'http://localhost:3000' );
@@ -170,17 +220,21 @@ function setup() {
     mapMoved();
   });
 
+  socket.on ( 'notify', function ( data ) {
+
+    notificationBubble.setFields ( data.text, data.color );
+    mapMoved();
+  });
+
   socket.on ( 'deleted', function ( data ) {
 
-    console.log ( pins.length );
     var found = false;
-    for ( var i = 0; i < pins.length; ++i ){
+    for ( var i = 0; i < pins.length; ++i ) {
 
       if ( pins[i].getID() == data ) found = true;
       if ( found && i != pins.length - 1 ) pins[i] = pins[i + 1];
     }
     if ( found ) pins.pop();
-    console.log ( pins.length );
     mapMoved();
   });
 
@@ -191,6 +245,10 @@ function setup() {
   addPinLabel = createElement ( 'p', 'Double click on the map to add a pin' );
   addPinLabel.position ( windowWidth - 250, 45 );
   addPinLabel.addClass ( 'whiteLabel' );
+
+  deleteLabel = createElement ( 'p', 'Put your mouse over a pin and press backspace to delete' );
+  deleteLabel.position ( windowWidth - 250, 75 );
+  deleteLabel.addClass ( 'whiteLabel' );
 
   canvas = createCanvas ( windowWidth, windowHeight );
   map = mappa.tileMap ( options );
@@ -236,6 +294,7 @@ function mapMoved () {
   clear();
   for ( var i = 0; i < pins.length; ++i ) { pins[i].putOnMap(); }
   newPinBubble.draw();
+  notificationBubble.putOnMap ();
 }
 
 function mousePressed () {
