@@ -8,6 +8,7 @@ var options = {
   lat: 40,
   lng: 0,
   zoom: 2,
+  minZoom: 1,
   studio: true, 
   style: 'mapbox://styles/mapbox/traffic-night-v2',
 };
@@ -90,14 +91,17 @@ class NewPinBubble {
 };
 
 class Pin {
-  constructor ( lat, lng, color, text ) {
+  constructor ( lat, lng, color, text, id ) {
 
     this.lat = lat;
     this.lng = lng;
     this.color = color;
     this.text = text;
     this.isClicked = false; // true if pin was clicked
+    this.id = id;
   }
+
+  getID() { return this.id; }
 
   clicked() {
 
@@ -136,6 +140,14 @@ class Pin {
     circle( pos.x, pos.y - map.zoom() * 5, map.zoom() * 2.5 );
   }
 
+  delete() {
+
+    pos = map.latLngToPixel( this.lat, this.lng );
+
+    if ( dist ( pos.x, pos.y - map.zoom() * 5, mouseX, mouseY ) < 10 ) return true;
+    return false;
+  }
+
 };
 
 function setup() {
@@ -143,18 +155,32 @@ function setup() {
   newPinBubble = new NewPinBubble();
 
   socket = io.connect ( 'https://acc-final.herokuapp.com' );
+  //socket = io.connect ( 'http://localhost:3000' );
 
   socket.on ( 'heresData', function ( data ) {
-    
+
     for ( var i = 0; i < data.length; ++i ) {
-      pins.push ( new Pin ( data[i].lat, data[i].lng, data[i].color, data[i].text ) );
+      pins.push ( new Pin ( data[i].lat, data[i].lng, data[i].color, data[i].text, data[i]._id ) );
     }
   });
 
   socket.on ( 'newPin', function ( data ) {
 
-    pins.push ( new Pin ( data.lat, data.lng, data.color, data.text ) );
+    pins.push ( new Pin ( data.lat, data.lng, data.color, data.text, data._id ) );
+    mapMoved();
+  });
 
+  socket.on ( 'deleted', function ( data ) {
+
+    console.log ( pins.length );
+    var found = false;
+    for ( var i = 0; i < pins.length; ++i ){
+
+      if ( pins[i].getID() == data ) found = true;
+      if ( found && i != pins.length - 1 ) pins[i] = pins[i + 1];
+    }
+    if ( found ) pins.pop();
+    console.log ( pins.length );
     mapMoved();
   });
 
@@ -223,8 +249,6 @@ function doubleClicked() { newPinBubble.open ( mouseX, mouseY ); }
 
 function createNewPin() {
 
-  pins.push ( new Pin ( newPinBubble.getX(), newPinBubble.getY(), colorPicker.value(), textInput.value() ) );
-
   socket.emit ( 'newPin', { 
     lat: newPinBubble.getX(),  
     lng: newPinBubble.getY(),
@@ -234,4 +258,19 @@ function createNewPin() {
 
   textInput.value ( '' );
   closeNewPinBubble();
+}
+
+function keyPressed() {
+  
+  if ( keyCode === BACKSPACE ) {
+    
+    for ( var i = 0; i < pins.length; ++i ){
+
+      if ( pins[i].delete() ) {
+
+        socket.emit ( 'deleted', pins[i].getID() );
+        return;
+      }
+    }
+  }
 }
