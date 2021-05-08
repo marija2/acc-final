@@ -32,6 +32,6 @@ There are three main functionalities that this application supports:
 
 ## Keep in mind:
 
-    Everyone can see the pins that you add. If you delete a pin, it will be 
-    deleted from the database, therefore, nobody else will be able to see it 
-    any more.
+Everyone can see the pins that you add. If you delete a pin, it will be 
+deleted from the database, therefore, nobody else will be able to see it 
+any more.
