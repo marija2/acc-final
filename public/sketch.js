@@ -8,7 +8,6 @@ var options = {
   lat: 40,
   lng: 0,
   zoom: 2,
-  minZoom: 1,
   studio: true, 
   style: 'mapbox://styles/mapbox/traffic-night-v2',
 };
@@ -18,7 +17,7 @@ var pins = [];
 var pos;
 
 var newPinBubble;
-
+var notificationBubble;
 var clickLabel;
 var addPinLabel;
 var deleteLabel;
@@ -29,8 +28,8 @@ var pinBtn;
 var closeBtn;
 
 var socket;
-var notificationBubble;
 
+// for the notification bubble that pops up when someone else adds a pin
 class NotificationBubble {
 
   constructor() {
@@ -42,7 +41,7 @@ class NotificationBubble {
   setFields ( text, color ) {
     this.text = text;
     this.color = color;
-    this.timer = 5;
+    this.timer = 5; // notification will be visible for 5 seconds
   }
 
   getTimer() { return this.timer; }
@@ -58,13 +57,16 @@ class NotificationBubble {
     bubbleColor.setAlpha ( 200 );
     fill ( bubbleColor );
     rect ( windowWidth - 310, windowHeight - 100, 290, 70, 20 );
+    // if the color of the notification is light, text is black
     if ( bubbleColor.levels[0] + bubbleColor.levels[1] + bubbleColor.levels[2] >= 381 ) fill ( 0 );
+    // otherwise, text is white
     else fill ( 255 );
     textAlign ( CENTER, CENTER );
     text ( this.text, windowWidth - 300, windowHeight - 90, 270, 50 );
   }
 };
 
+// for the bubble that appears when someone wants to add a new pin
 class NewPinBubble {
 
   constructor ( ) {
@@ -145,12 +147,14 @@ class Pin {
 
     pos = map.latLngToPixel( this.lat, this.lng );
 
+    // flip the value of this.isClicked if map was clicked close to that pin
     if ( dist ( pos.x, pos.y - map.zoom() * 5, mouseX, mouseY ) < 10 && !this.isClicked ) { this.isClicked = !this.isClicked; }
     if ( dist ( pos.x, pos.y - map.zoom() * 20, mouseX, mouseY ) < map.zoom() * 15 && this.isClicked ) { this.isClicked = !this.isClicked; }
   }
 
   putInfoOnMap() {
 
+    // limit the size of the pin
     var zoom = map.zoom();
     if ( map.zoom() > 7 ) zoom = 7;
 
@@ -181,6 +185,7 @@ class Pin {
     circle( pos.x, pos.y - map.zoom() * 5, map.zoom() * 2.5 );
   }
 
+  // check whether mouse is close to this pin when backspace is clicked
   delete() {
 
     pos = map.latLngToPixel( this.lat, this.lng );
@@ -191,6 +196,7 @@ class Pin {
 
 };
 
+// called every second, to count the 5 seconds for which the notification should be visible
 function  timeIt() {
   
   if ( notificationBubble.getTimer() > 0 ) notificationBubble.decrementTimer();
@@ -199,14 +205,17 @@ function  timeIt() {
 
 function setup() {
 
+  // call timeIt every second
   setInterval ( timeIt, 1000 );
 
+  // will have one of each
   newPinBubble = new NewPinBubble();
   notificationBubble = new NotificationBubble();
 
   socket = io.connect ( 'https://acc-final.herokuapp.com' );
   //socket = io.connect ( 'http://localhost:3000' );
 
+  // when the server sends all of the data, create an array of pins
   socket.on ( 'heresData', function ( data ) {
 
     for ( var i = 0; i < data.length; ++i ) {
@@ -214,18 +223,21 @@ function setup() {
     }
   });
 
+  // add a pin to the array
   socket.on ( 'newPin', function ( data ) {
 
     pins.push ( new Pin ( data.lat, data.lng, data.color, data.text, data._id ) );
     mapMoved();
   });
 
+  // set the timer for the notification
   socket.on ( 'notify', function ( data ) {
 
     notificationBubble.setFields ( data.text, data.color );
     mapMoved();
   });
 
+  // remove the pin with that id from the array
   socket.on ( 'deleted', function ( data ) {
 
     var found = false;
@@ -238,6 +250,7 @@ function setup() {
     mapMoved();
   });
 
+  // three labels at the top-right corner of the map
   clickLabel = createElement ( 'p', 'Click on a pin to read more about it' );
   clickLabel.position ( windowWidth - 250, 15 );
   clickLabel.addClass ( 'whiteLabel' );
@@ -250,11 +263,13 @@ function setup() {
   deleteLabel.position ( windowWidth - 250, 75 );
   deleteLabel.addClass ( 'whiteLabel' );
 
+  // put map on canvas
   canvas = createCanvas ( windowWidth, windowHeight );
   map = mappa.tileMap ( options );
   map.overlay ( canvas );
   map.onChange ( mapMoved );
 
+  // elements for the new Pin bubble
   colorLabel = createElement ( 'p', 'Choose the color of your pin:' );
   colorLabel.addClass ( 'hide' );
   colorLabel.addClass ( 'whiteLabel' );
@@ -282,21 +297,25 @@ function setup() {
   closeBtn.mousePressed ( closeNewPinBubble );
 }
 
-
+// remove the new pin bubble from the map
 function closeNewPinBubble() {
 
   newPinBubble.close();
   mapMoved();
 }
 
+// clear the canvas, draw all pins
+// and the new pin bubble if it is open
+// and the notification if the timer for the last one hasn't run out 
 function mapMoved () { 
 
   clear();
   for ( var i = 0; i < pins.length; ++i ) { pins[i].putOnMap(); }
   newPinBubble.draw();
-  notificationBubble.putOnMap ();
+  notificationBubble.putOnMap();
 }
 
+// check whether map was clicked close to a pin
 function mousePressed () {
   // change status of pin if it is clicked
   if ( pins.length == 0 ) return;
@@ -304,8 +323,10 @@ function mousePressed () {
   mapMoved();
 }
 
+// open the new pin bubble where map was double clicked
 function doubleClicked() { newPinBubble.open ( mouseX, mouseY ); }
 
+// tell the server you added a new pin
 function createNewPin() {
 
   socket.emit ( 'newPin', { 
@@ -319,11 +340,12 @@ function createNewPin() {
   closeNewPinBubble();
 }
 
+// if backspace is pressed and mouse is over a pin, tell the server you deleted that pin
 function keyPressed() {
   
   if ( keyCode === BACKSPACE ) {
     
-    for ( var i = 0; i < pins.length; ++i ){
+    for ( var i = 0; i < pins.length; ++i ) {
 
       if ( pins[i].delete() ) {
 

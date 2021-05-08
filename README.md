@@ -37,3 +37,10 @@ There are three main functionalities that this application supports:
 Everyone can see the pins that you add. If you delete a pin, it will be 
 deleted from the database, therefore, nobody else will be able to see it 
 any more.
+
+## How this application was implemented:
+
+This application uses node.js to run the server code. Additionally, the "express" 
+and "socket.io" npm packages were used to enable the client code to communicate 
+with the server code. Lastly, the "nedb" npm package was used to create and maintain
+a database which stores the pins on the map. A MapBox map was used for the front end.
