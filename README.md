@@ -11,7 +11,8 @@ There are three main functionalities that this application supports:
 
 ###### 1. Viewing the text attached to each pin
 
-    In order to see the text for each pin, simply click on a pin for which you want to get more information. The pin will get larger and you will be able to see the text associated to that pin.
+    In order to see the text for each pin, simply click on a pin for which you\\
+    want to get more information. The pin will get larger and you will be able to see the text associated to that pin.
 
 ###### 2. Adding a new pin
 
