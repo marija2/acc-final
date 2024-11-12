@@ -1,11 +1,9 @@
 # acc-final
-Final Project for Advanced Creative Coding S21 by Marija Trifkovic
+Final Project for Advanced Creative Coding Spring 21
 
-Please see tech_diagram.png for the tech diagram and user_workflow.png for the user workflow.
+<img width="1205" alt="Screen Shot 2021-04-25 at 2 32 12 PM" src="https://github.com/user-attachments/assets/63a190fd-7311-4410-91f5-4b28a9c29d17">
 
-This application has been deployed on Heroku: https://acc-final.herokuapp.com
-
-This application supports adding pins to a map in order to mark places that are important to you for whatever reason. You will be able to see all of the pins that have ever been added to the map. You can also delete pins if you like. If somebody else adds a pin to the map while you are looking at the map, you will be notified.
+This application supports adding pins to a map in order to mark places that are important to you. You will be able to see all of the pins that anybody has ever added to the map. You can also delete pins if you like. If somebody else adds a pin to the map while you are looking at the map, you will be notified.
 
 ## How to use this application:
 
